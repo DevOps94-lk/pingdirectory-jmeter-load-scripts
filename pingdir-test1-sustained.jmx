@@ -2,7 +2,7 @@
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
   <hashTree>
     <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="PingDirectory - Test 1 - Sustained" enabled="true">
-      <stringProp name="TestPlan.comments">Native LDAP samplers (no Groovy - runs on any Java). Holds the per-second rates in settings.properties for 30 min. Entries created under ou=loadgen. Keep deletePerSec &lt;= addPerSec.</stringProp>
+      <stringProp name="TestPlan.comments">Native LDAP samplers (no Groovy - runs on any Java). Holds the per-second rates in settings.properties for 30 min. Entries created directly under pd.baseDN. Keep deletePerSec &lt;= addPerSec.</stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
@@ -26,76 +26,6 @@
       </elementProp>
     </TestPlan>
     <hashTree>
-      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="Setup - create ou=loadgen" enabled="true">
-        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
-        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
-          <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">1</stringProp>
-        </elementProp>
-        <stringProp name="ThreadGroup.num_threads">1</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
-        <boolProp name="ThreadGroup.scheduler">false</boolProp>
-      </SetupThreadGroup>
-      <hashTree>
-        <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Create ou=loadgen (ignore if exists)" enabled="true">
-          <stringProp name="servername">${__P(pd.hostWrite,localhost)}</stringProp>
-          <stringProp name="port">${__P(pd.port,1636)}</stringProp>
-          <stringProp name="rootdn">${BASEDN}</stringProp>
-          <stringProp name="test">bind</stringProp>
-          <boolProp name="secure">true</boolProp>
-          <boolProp name="trustAll">true</boolProp>
-          <stringProp name="user_dn">${__P(pd.bindDN,)}</stringProp>
-          <stringProp name="user_pw">${__P(pd.bindPw,)}</stringProp>
-          <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
-          <stringProp name="attributes"></stringProp>
-          <boolProp name="return_object">false</boolProp>
-          <boolProp name="deref_aliases">false</boolProp>
-          <boolProp name="parseflag">false</boolProp>
-          <stringProp name="connection_timeout">5000</stringProp>
-        </org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler>
-        <hashTree/>
-        <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Add ou=loadgen" enabled="true">
-          <stringProp name="rootdn">${BASEDN}</stringProp>
-          <stringProp name="test">add</stringProp>
-          <stringProp name="base_entry_dn">ou=loadgen</stringProp>
-          <elementProp name="arguments" elementType="LDAPArguments" guiclass="org.apache.jmeter.protocol.ldap.config.gui.LDAPArgumentsPanel" testclass="LDAPArguments" testname="LDAPArguments" enabled="true">
-            <collectionProp name="Arguments.arguments">
-            <elementProp name="objectClass" elementType="LDAPArgument">
-              <stringProp name="Argument.name">objectClass</stringProp>
-              <stringProp name="Argument.value">top</stringProp>
-              <stringProp name="Argument.metadata">=</stringProp>
-              <stringProp name="opcode">add</stringProp>
-              <stringProp name="Argument.desc"></stringProp>
-            </elementProp>
-            <elementProp name="objectClass" elementType="LDAPArgument">
-              <stringProp name="Argument.name">objectClass</stringProp>
-              <stringProp name="Argument.value">organizationalUnit</stringProp>
-              <stringProp name="Argument.metadata">=</stringProp>
-              <stringProp name="opcode">add</stringProp>
-              <stringProp name="Argument.desc"></stringProp>
-            </elementProp>
-            <elementProp name="ou" elementType="LDAPArgument">
-              <stringProp name="Argument.name">ou</stringProp>
-              <stringProp name="Argument.value">loadgen</stringProp>
-              <stringProp name="Argument.metadata">=</stringProp>
-              <stringProp name="opcode">add</stringProp>
-              <stringProp name="Argument.desc"></stringProp>
-            </elementProp>
-            </collectionProp>
-          </elementProp>
-          <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
-          <stringProp name="attributes"></stringProp>
-          <boolProp name="return_object">false</boolProp>
-          <boolProp name="deref_aliases">false</boolProp>
-          <boolProp name="parseflag">false</boolProp>
-          <stringProp name="connection_timeout">5000</stringProp>
-        </org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler>
-        <hashTree/>
-      </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Search" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
@@ -117,12 +47,12 @@
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">bind</stringProp>
           <boolProp name="secure">true</boolProp>
-          <boolProp name="trustAll">true</boolProp>
+          <boolProp name="trustall">true</boolProp>
           <stringProp name="user_dn">${__P(pd.bindDN,)}</stringProp>
           <stringProp name="user_pw">${__P(pd.bindPw,)}</stringProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -137,8 +67,8 @@
           <stringProp name="search"></stringProp>
           <stringProp name="searchfilter">${__P(pd.searchFilter,(uid=tommytester))}</stringProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -173,12 +103,12 @@
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">bind</stringProp>
           <boolProp name="secure">true</boolProp>
-          <boolProp name="trustAll">true</boolProp>
+          <boolProp name="trustall">true</boolProp>
           <stringProp name="user_dn">${__P(pd.bindDN,)}</stringProp>
           <stringProp name="user_pw">${__P(pd.bindPw,)}</stringProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -190,7 +120,7 @@
         <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Add" enabled="true">
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">add</stringProp>
-          <stringProp name="base_entry_dn">uid=e-${RUNID}-${__counter(TRUE,)},ou=loadgen</stringProp>
+          <stringProp name="base_entry_dn">uid=e-${RUNID}-${__counter(TRUE,)}</stringProp>
           <elementProp name="arguments" elementType="LDAPArguments" guiclass="org.apache.jmeter.protocol.ldap.config.gui.LDAPArgumentsPanel" testclass="LDAPArguments" testname="LDAPArguments" enabled="true">
             <collectionProp name="Arguments.arguments">
             <elementProp name="objectClass" elementType="LDAPArgument">
@@ -245,8 +175,8 @@
             </collectionProp>
           </elementProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -281,12 +211,12 @@
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">bind</stringProp>
           <boolProp name="secure">true</boolProp>
-          <boolProp name="trustAll">true</boolProp>
+          <boolProp name="trustall">true</boolProp>
           <stringProp name="user_dn">${__P(pd.bindDN,)}</stringProp>
           <stringProp name="user_pw">${__P(pd.bindPw,)}</stringProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -298,11 +228,11 @@
         <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Delete" enabled="true">
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">delete</stringProp>
-          <stringProp name="delete">uid=e-${RUNID}-${__counter(TRUE,)},ou=loadgen</stringProp>
-          <stringProp name="base_entry_dn">uid=e-${RUNID}-${__counter(TRUE,)},ou=loadgen</stringProp>
+          <stringProp name="delete">uid=e-${RUNID}-${__counter(TRUE,)}</stringProp>
+          <stringProp name="base_entry_dn">uid=e-${RUNID}-${__counter(TRUE,)}</stringProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -337,12 +267,12 @@
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">bind</stringProp>
           <boolProp name="secure">true</boolProp>
-          <boolProp name="trustAll">true</boolProp>
+          <boolProp name="trustall">true</boolProp>
           <stringProp name="user_dn">${__P(pd.bindDN,)}</stringProp>
           <stringProp name="user_pw">${__P(pd.bindPw,)}</stringProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -367,8 +297,8 @@
             </collectionProp>
           </elementProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
