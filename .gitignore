@@ -1,0 +1,6 @@
+out/
+*.jtl
+*.log
+jmeter.log
+*.jks
+*.pem
