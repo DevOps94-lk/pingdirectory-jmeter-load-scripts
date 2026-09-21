@@ -4,8 +4,8 @@ This kit puts a controlled amount of traffic on PingDirectory so you can see how
 it copes. Two ready-made tests. Fill in a few lines and run.
 
 It uses JMeter's built-in LDAP samplers, so it runs on any modern Java (Java 17
-or newer) with no extra setup. Test records are created under a dedicated
-`ou=loadgen` branch beneath your base DN, so they're easy to find and remove.
+or newer) with no extra setup. Test records are created directly under the base DN you specify, and named
+`uid=e-...` so they're easy to find and remove.
 
 ---
 
@@ -18,8 +18,8 @@ jmeter -v
 ```
 
 If it says "not found", add JMeter's `bin` folder to your PATH. (Java's `bin`
-folder should be on your PATH too - the scripts use `keytool` from it to trust
-the server certificate automatically.)
+folder should be on your PATH too - the scripts use `keytool` from it for a quick
+connection check before each run.)
 
 ## Step 2 — Tell it where to connect and how hard to push
 
@@ -98,18 +98,23 @@ kubectl top  pods -n userstore-blue -l app.kubernetes.io/name=pingdirectory
 
 ## Cleaning up test records
 
-Adds create records under `ou=loadgen` beneath your base DN. Deletes during the
-run remove some; if you add faster than you delete, the rest stay after the run.
-To remove them all, purge that one branch (adjust host, port, and bind):
+Adds create records **directly under your base DN**, named `uid=e-...`. Deletes
+during the run remove some; if you add faster than you delete, the rest stay
+after the run. To remove any leftovers, delete the `uid=e-*` entries under your
+base DN (adjust host, port, bind, and base DN):
 
 ```
-ldapdelete --hostname YOUR_HOST --port 1636 --useSSL --trustAll \
+ldapsearch --hostname YOUR_HOST --port 1636 --useSSL --trustAll \
   --bindDN "YOUR_BIND_DN" --bindPassword "YOUR_PASSWORD" \
-  --deleteSubtree "ou=loadgen,ou=test,o=TUCUSTOMERSTAGE"
+  --baseDN "ou=test,o=TUCUSTOMERSTAGE" --searchScope one "(uid=e-*)" "1.1" \
+  | grep "^dn:" | sed "s/^dn: //" \
+  | ldapdelete --hostname YOUR_HOST --port 1636 --useSSL --trustAll \
+      --bindDN "YOUR_BIND_DN" --bindPassword "YOUR_PASSWORD"
 ```
 
-(`ldapdelete` ships with PingDirectory, in its `bin` folder. On Windows use
-`ldapdelete.bat`.)
+(`ldapsearch` and `ldapdelete` ship with PingDirectory, in its `bin` folder. On
+Windows use the `.bat` versions. Run the `ldapsearch` part alone first to see
+what would be deleted.)
 
 ---
 
@@ -123,8 +128,7 @@ very first time on a new machine:
 2. Set small numbers in settings (search 5, add 1, delete 1), run Test 1 for a
    minute, and open the report.
 3. Confirm the Search and Add rows are mostly green. If Add fails, check the bind
-   login can create entries under `ou=test`, and that `ou=loadgen` got created
-   (the test tries to create it automatically at the start).
+   login can create entries under `ou=test`, and the records appear under your base DN.
 
 Once that looks good, set your real numbers.
 
@@ -132,12 +136,12 @@ Once that looks good, set your real numbers.
 
 ## Good to know
 
-- **LDAPS certificate is handled for you.** On the first run, the script fetches
-  PingDirectory's certificate straight from the server (using `keytool`) and trusts
-  it automatically - you never export or import a certificate by hand. It's saved
-  in `pd-truststore.jks` next to the kit; delete that file if the server's
-  certificate ever changes and it'll be re-fetched. For plain LDAP (port 1389)
-  instead of LDAPS, ask and I'll give you a plain build.
+- **LDAPS just works.** The test trusts PingDirectory's certificate automatically
+  (`trustAll`) and skips the hostname check, so pointing `pd.hostWrite` at a load
+  balancer IP is fine. Before each run the script does a quick TLS handshake and
+  stops with a clear message if the server isn't reachable. This is meant for
+  test environments only. For plain LDAP (port 1389) instead of LDAPS, ask and
+  I'll give you a plain build.
 - **Each run replaces the last report.** Copy the folder first to keep an old one.
 - **The starting numbers are a sensible guess** based on recent production
   figures (mostly look-ups). Change them to whatever you want to test.
