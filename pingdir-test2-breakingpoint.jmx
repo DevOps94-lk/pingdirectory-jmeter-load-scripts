@@ -26,83 +26,13 @@
       </elementProp>
     </TestPlan>
     <hashTree>
-      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="Setup - create ou=loadgen" enabled="true">
-        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
-        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
-          <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">1</stringProp>
-        </elementProp>
-        <stringProp name="ThreadGroup.num_threads">1</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
-        <boolProp name="ThreadGroup.scheduler">false</boolProp>
-      </SetupThreadGroup>
-      <hashTree>
-        <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Create ou=loadgen (ignore if exists)" enabled="true">
-          <stringProp name="servername">${__P(pd.hostWrite,localhost)}</stringProp>
-          <stringProp name="port">${__P(pd.port,1636)}</stringProp>
-          <stringProp name="rootdn">${BASEDN}</stringProp>
-          <stringProp name="test">bind</stringProp>
-          <boolProp name="secure">true</boolProp>
-          <boolProp name="trustAll">true</boolProp>
-          <stringProp name="user_dn">${__P(pd.bindDN,)}</stringProp>
-          <stringProp name="user_pw">${__P(pd.bindPw,)}</stringProp>
-          <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
-          <stringProp name="attributes"></stringProp>
-          <boolProp name="return_object">false</boolProp>
-          <boolProp name="deref_aliases">false</boolProp>
-          <boolProp name="parseflag">false</boolProp>
-          <stringProp name="connection_timeout">5000</stringProp>
-        </org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler>
-        <hashTree/>
-        <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Add ou=loadgen" enabled="true">
-          <stringProp name="rootdn">${BASEDN}</stringProp>
-          <stringProp name="test">add</stringProp>
-          <stringProp name="base_entry_dn">ou=loadgen</stringProp>
-          <elementProp name="arguments" elementType="LDAPArguments" guiclass="org.apache.jmeter.protocol.ldap.config.gui.LDAPArgumentsPanel" testclass="LDAPArguments" testname="LDAPArguments" enabled="true">
-            <collectionProp name="Arguments.arguments">
-            <elementProp name="objectClass" elementType="LDAPArgument">
-              <stringProp name="Argument.name">objectClass</stringProp>
-              <stringProp name="Argument.value">top</stringProp>
-              <stringProp name="Argument.metadata">=</stringProp>
-              <stringProp name="opcode">add</stringProp>
-              <stringProp name="Argument.desc"></stringProp>
-            </elementProp>
-            <elementProp name="objectClass" elementType="LDAPArgument">
-              <stringProp name="Argument.name">objectClass</stringProp>
-              <stringProp name="Argument.value">organizationalUnit</stringProp>
-              <stringProp name="Argument.metadata">=</stringProp>
-              <stringProp name="opcode">add</stringProp>
-              <stringProp name="Argument.desc"></stringProp>
-            </elementProp>
-            <elementProp name="ou" elementType="LDAPArgument">
-              <stringProp name="Argument.name">ou</stringProp>
-              <stringProp name="Argument.value">loadgen</stringProp>
-              <stringProp name="Argument.metadata">=</stringProp>
-              <stringProp name="opcode">add</stringProp>
-              <stringProp name="Argument.desc"></stringProp>
-            </elementProp>
-            </collectionProp>
-          </elementProp>
-          <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
-          <stringProp name="attributes"></stringProp>
-          <boolProp name="return_object">false</boolProp>
-          <boolProp name="deref_aliases">false</boolProp>
-          <boolProp name="parseflag">false</boolProp>
-          <stringProp name="connection_timeout">5000</stringProp>
-        </org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler>
-        <hashTree/>
-      </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Search" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">true</boolProp>
           <intProp name="LoopController.loops">-1</intProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">${__P(pd.searchThreads,20)}</stringProp>
+        <stringProp name="ThreadGroup.num_threads">${__jexl3( ${__P(pd.searchPerSec,25)} &gt; 0 ? ${__P(pd.searchThreads,20)} : 0 )}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">5</stringProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.duration">${__P(pd.durationSec,7200)}</stringProp>
@@ -117,12 +47,12 @@
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">bind</stringProp>
           <boolProp name="secure">true</boolProp>
-          <boolProp name="trustAll">true</boolProp>
+          <boolProp name="trustall">true</boolProp>
           <stringProp name="user_dn">${__P(pd.bindDN,)}</stringProp>
           <stringProp name="user_pw">${__P(pd.bindPw,)}</stringProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -137,8 +67,49 @@
           <stringProp name="search"></stringProp>
           <stringProp name="searchfilter">${__P(pd.searchFilter,(uid=tommytester))}</stringProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
+          <stringProp name="attributes"></stringProp>
+          <boolProp name="return_object">false</boolProp>
+          <boolProp name="deref_aliases">false</boolProp>
+          <boolProp name="parseflag">false</boolProp>
+          <stringProp name="connection_timeout">5000</stringProp>
+        </org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler>
+        <hashTree>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry must be found" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp name="0">hasElements=true</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.custom_message">Search matched no entry - check pd.searchFilter and pd.baseDN</stringProp>
+            <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">16</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+          <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Rate (samples/min)" enabled="true">
+            <intProp name="calcMode">4</intProp>
+            <stringProp name="throughput">${__jexl3( ${__P(pd.searchPerSec,25)} &gt; 0 ? ((${__P(pd.searchPerSec,25)} * 60.0) * (1 + (${__P(pd.rampStepPercent,30)}/100.0) * ((${__time()} - ${START})/1000.0/${__P(pd.rampStepSeconds,120)}))) : 0.001 )}</stringProp>
+          </ConstantThroughputTimer>
+          <hashTree/>
+        </hashTree>
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Reconnect if connection lost" enabled="true">
+          <stringProp name="IfController.condition">${__jexl3(!ctx.getPreviousResult().isSuccessful() &amp;&amp; ctx.getPreviousResult().getResponseCode() == "800")}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree>
+        <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Reconnect" enabled="true">
+          <stringProp name="servername">${__P(pd.hostWrite,localhost)}</stringProp>
+          <stringProp name="port">${__P(pd.port,1636)}</stringProp>
+          <stringProp name="rootdn">${BASEDN}</stringProp>
+          <stringProp name="test">bind</stringProp>
+          <boolProp name="secure">true</boolProp>
+          <boolProp name="trustall">true</boolProp>
+          <stringProp name="user_dn">${__P(pd.bindDN,)}</stringProp>
+          <stringProp name="user_pw">${__P(pd.bindPw,)}</stringProp>
+          <stringProp name="scope">2</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -146,11 +117,7 @@
           <stringProp name="connection_timeout">5000</stringProp>
         </org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler>
         <hashTree/>
-        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Rate (samples/min)" enabled="true">
-          <intProp name="calcMode">2</intProp>
-          <stringProp name="throughput">${__jexl3( ${__P(pd.searchPerSec,25)} &gt; 0 ? ((${__P(pd.searchPerSec,25)} * 60.0) * (1 + (${__P(pd.rampStepPercent,30)}/100.0) * ((${__time()} - ${START})/1000.0/${__P(pd.rampStepSeconds,120)}))) : 0.001 )}</stringProp>
-        </ConstantThroughputTimer>
-        <hashTree/>
+        </hashTree>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Add" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
@@ -158,13 +125,22 @@
           <boolProp name="LoopController.continue_forever">true</boolProp>
           <intProp name="LoopController.loops">-1</intProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">${__P(pd.addThreads,10)}</stringProp>
+        <stringProp name="ThreadGroup.num_threads">${__jexl3( ${__P(pd.addPerSec,1)} &gt; 0 ? ${__P(pd.addThreads,10)} : 0 )}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">5</stringProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.duration">${__P(pd.durationSec,7200)}</stringProp>
         <stringProp name="ThreadGroup.delay">0</stringProp>
       </ThreadGroup>
       <hashTree>
+        <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Add counter (global)" enabled="true">
+          <stringProp name="CounterConfig.start">1</stringProp>
+          <stringProp name="CounterConfig.end"></stringProp>
+          <stringProp name="CounterConfig.incr">1</stringProp>
+          <stringProp name="CounterConfig.name">ADDID</stringProp>
+          <stringProp name="CounterConfig.format"></stringProp>
+          <boolProp name="CounterConfig.per_user">false</boolProp>
+        </CounterConfig>
+        <hashTree/>
         <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Bind once per thread" enabled="true"/>
         <hashTree>
         <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Thread bind" enabled="true">
@@ -173,12 +149,12 @@
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">bind</stringProp>
           <boolProp name="secure">true</boolProp>
-          <boolProp name="trustAll">true</boolProp>
+          <boolProp name="trustall">true</boolProp>
           <stringProp name="user_dn">${__P(pd.bindDN,)}</stringProp>
           <stringProp name="user_pw">${__P(pd.bindPw,)}</stringProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -190,63 +166,85 @@
         <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Add" enabled="true">
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">add</stringProp>
-          <stringProp name="base_entry_dn">uid=e-${RUNID}-${__counter(TRUE,)},ou=loadgen</stringProp>
-          <elementProp name="arguments" elementType="LDAPArguments" guiclass="org.apache.jmeter.protocol.ldap.config.gui.LDAPArgumentsPanel" testclass="LDAPArguments" testname="LDAPArguments" enabled="true">
+          <stringProp name="base_entry_dn">uid=e-${RUNID}-${ADDID}</stringProp>
+          <elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments">
-            <elementProp name="objectClass" elementType="LDAPArgument">
+            <elementProp name="objectClass" elementType="Argument">
               <stringProp name="Argument.name">objectClass</stringProp>
               <stringProp name="Argument.value">top</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
-              <stringProp name="opcode">add</stringProp>
-              <stringProp name="Argument.desc"></stringProp>
             </elementProp>
-            <elementProp name="objectClass" elementType="LDAPArgument">
+            <elementProp name="objectClass" elementType="Argument">
               <stringProp name="Argument.name">objectClass</stringProp>
               <stringProp name="Argument.value">person</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
-              <stringProp name="opcode">add</stringProp>
-              <stringProp name="Argument.desc"></stringProp>
             </elementProp>
-            <elementProp name="objectClass" elementType="LDAPArgument">
+            <elementProp name="objectClass" elementType="Argument">
               <stringProp name="Argument.name">objectClass</stringProp>
               <stringProp name="Argument.value">organizationalPerson</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
-              <stringProp name="opcode">add</stringProp>
-              <stringProp name="Argument.desc"></stringProp>
             </elementProp>
-            <elementProp name="objectClass" elementType="LDAPArgument">
+            <elementProp name="objectClass" elementType="Argument">
               <stringProp name="Argument.name">objectClass</stringProp>
               <stringProp name="Argument.value">inetOrgPerson</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
-              <stringProp name="opcode">add</stringProp>
-              <stringProp name="Argument.desc"></stringProp>
             </elementProp>
-            <elementProp name="cn" elementType="LDAPArgument">
+            <elementProp name="uid" elementType="Argument">
+              <stringProp name="Argument.name">uid</stringProp>
+              <stringProp name="Argument.value">e-${RUNID}-${ADDID}</stringProp>
+              <stringProp name="Argument.metadata">=</stringProp>
+            </elementProp>
+            <elementProp name="cn" elementType="Argument">
               <stringProp name="Argument.name">cn</stringProp>
               <stringProp name="Argument.value">loadtest</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
-              <stringProp name="opcode">add</stringProp>
-              <stringProp name="Argument.desc"></stringProp>
             </elementProp>
-            <elementProp name="sn" elementType="LDAPArgument">
+            <elementProp name="sn" elementType="Argument">
               <stringProp name="Argument.name">sn</stringProp>
               <stringProp name="Argument.value">loadtest</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
-              <stringProp name="opcode">add</stringProp>
-              <stringProp name="Argument.desc"></stringProp>
             </elementProp>
-            <elementProp name="userPassword" elementType="LDAPArgument">
+            <elementProp name="userPassword" elementType="Argument">
               <stringProp name="Argument.name">userPassword</stringProp>
               <stringProp name="Argument.value">Passw0rd123!</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
-              <stringProp name="opcode">add</stringProp>
-              <stringProp name="Argument.desc"></stringProp>
             </elementProp>
             </collectionProp>
           </elementProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
+          <stringProp name="attributes"></stringProp>
+          <boolProp name="return_object">false</boolProp>
+          <boolProp name="deref_aliases">false</boolProp>
+          <boolProp name="parseflag">false</boolProp>
+          <stringProp name="connection_timeout">5000</stringProp>
+        </org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler>
+        <hashTree>
+          <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Rate (samples/min)" enabled="true">
+            <intProp name="calcMode">4</intProp>
+            <stringProp name="throughput">${__jexl3( ${__P(pd.addPerSec,1)} &gt; 0 ? ((${__P(pd.addPerSec,1)} * 60.0) * (1 + (${__P(pd.rampStepPercent,30)}/100.0) * ((${__time()} - ${START})/1000.0/${__P(pd.rampStepSeconds,120)}))) : 0.001 )}</stringProp>
+          </ConstantThroughputTimer>
+          <hashTree/>
+        </hashTree>
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Reconnect if connection lost" enabled="true">
+          <stringProp name="IfController.condition">${__jexl3(!ctx.getPreviousResult().isSuccessful() &amp;&amp; ctx.getPreviousResult().getResponseCode() == "800")}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree>
+        <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Reconnect" enabled="true">
+          <stringProp name="servername">${__P(pd.hostWrite,localhost)}</stringProp>
+          <stringProp name="port">${__P(pd.port,1636)}</stringProp>
+          <stringProp name="rootdn">${BASEDN}</stringProp>
+          <stringProp name="test">bind</stringProp>
+          <boolProp name="secure">true</boolProp>
+          <boolProp name="trustall">true</boolProp>
+          <stringProp name="user_dn">${__P(pd.bindDN,)}</stringProp>
+          <stringProp name="user_pw">${__P(pd.bindPw,)}</stringProp>
+          <stringProp name="scope">2</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -254,11 +252,7 @@
           <stringProp name="connection_timeout">5000</stringProp>
         </org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler>
         <hashTree/>
-        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Rate (samples/min)" enabled="true">
-          <intProp name="calcMode">2</intProp>
-          <stringProp name="throughput">${__jexl3( ${__P(pd.addPerSec,1)} &gt; 0 ? ((${__P(pd.addPerSec,1)} * 60.0) * (1 + (${__P(pd.rampStepPercent,30)}/100.0) * ((${__time()} - ${START})/1000.0/${__P(pd.rampStepSeconds,120)}))) : 0.001 )}</stringProp>
-        </ConstantThroughputTimer>
-        <hashTree/>
+        </hashTree>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Delete" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
@@ -266,13 +260,22 @@
           <boolProp name="LoopController.continue_forever">true</boolProp>
           <intProp name="LoopController.loops">-1</intProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">${__P(pd.deleteThreads,10)}</stringProp>
+        <stringProp name="ThreadGroup.num_threads">${__jexl3( ${__P(pd.deletePerSec,0)} &gt; 0 ? ${__P(pd.deleteThreads,10)} : 0 )}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">5</stringProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.duration">${__P(pd.durationSec,7200)}</stringProp>
         <stringProp name="ThreadGroup.delay">${__P(pd.deleteStartDelaySec,10)}</stringProp>
       </ThreadGroup>
       <hashTree>
+        <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Delete counter (global)" enabled="true">
+          <stringProp name="CounterConfig.start">1</stringProp>
+          <stringProp name="CounterConfig.end"></stringProp>
+          <stringProp name="CounterConfig.incr">1</stringProp>
+          <stringProp name="CounterConfig.name">DELID</stringProp>
+          <stringProp name="CounterConfig.format"></stringProp>
+          <boolProp name="CounterConfig.per_user">false</boolProp>
+        </CounterConfig>
+        <hashTree/>
         <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Bind once per thread" enabled="true"/>
         <hashTree>
         <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Thread bind" enabled="true">
@@ -281,12 +284,12 @@
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">bind</stringProp>
           <boolProp name="secure">true</boolProp>
-          <boolProp name="trustAll">true</boolProp>
+          <boolProp name="trustall">true</boolProp>
           <stringProp name="user_dn">${__P(pd.bindDN,)}</stringProp>
           <stringProp name="user_pw">${__P(pd.bindPw,)}</stringProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -298,11 +301,41 @@
         <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Delete" enabled="true">
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">delete</stringProp>
-          <stringProp name="delete">uid=e-${RUNID}-${__counter(TRUE,)},ou=loadgen</stringProp>
-          <stringProp name="base_entry_dn">uid=e-${RUNID}-${__counter(TRUE,)},ou=loadgen</stringProp>
+          <stringProp name="delete">uid=e-${RUNID}-${DELID}</stringProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
+          <stringProp name="attributes"></stringProp>
+          <boolProp name="return_object">false</boolProp>
+          <boolProp name="deref_aliases">false</boolProp>
+          <boolProp name="parseflag">false</boolProp>
+          <stringProp name="connection_timeout">5000</stringProp>
+        </org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler>
+        <hashTree>
+          <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Rate (samples/min)" enabled="true">
+            <intProp name="calcMode">4</intProp>
+            <stringProp name="throughput">${__jexl3( ${__P(pd.deletePerSec,0)} &gt; 0 ? ((${__P(pd.deletePerSec,0)} * 60.0) * (1 + (${__P(pd.rampStepPercent,30)}/100.0) * ((${__time()} - ${START})/1000.0/${__P(pd.rampStepSeconds,120)}))) : 0.001 )}</stringProp>
+          </ConstantThroughputTimer>
+          <hashTree/>
+        </hashTree>
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Reconnect if connection lost" enabled="true">
+          <stringProp name="IfController.condition">${__jexl3(!ctx.getPreviousResult().isSuccessful() &amp;&amp; ctx.getPreviousResult().getResponseCode() == "800")}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree>
+        <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Reconnect" enabled="true">
+          <stringProp name="servername">${__P(pd.hostWrite,localhost)}</stringProp>
+          <stringProp name="port">${__P(pd.port,1636)}</stringProp>
+          <stringProp name="rootdn">${BASEDN}</stringProp>
+          <stringProp name="test">bind</stringProp>
+          <boolProp name="secure">true</boolProp>
+          <boolProp name="trustall">true</boolProp>
+          <stringProp name="user_dn">${__P(pd.bindDN,)}</stringProp>
+          <stringProp name="user_pw">${__P(pd.bindPw,)}</stringProp>
+          <stringProp name="scope">2</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -310,11 +343,7 @@
           <stringProp name="connection_timeout">5000</stringProp>
         </org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler>
         <hashTree/>
-        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Rate (samples/min)" enabled="true">
-          <intProp name="calcMode">2</intProp>
-          <stringProp name="throughput">${__jexl3( ${__P(pd.deletePerSec,0)} &gt; 0 ? ((${__P(pd.deletePerSec,0)} * 60.0) * (1 + (${__P(pd.rampStepPercent,30)}/100.0) * ((${__time()} - ${START})/1000.0/${__P(pd.rampStepSeconds,120)}))) : 0.001 )}</stringProp>
-        </ConstantThroughputTimer>
-        <hashTree/>
+        </hashTree>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Modify" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
@@ -322,7 +351,7 @@
           <boolProp name="LoopController.continue_forever">true</boolProp>
           <intProp name="LoopController.loops">-1</intProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">${__P(pd.modifyThreads,10)}</stringProp>
+        <stringProp name="ThreadGroup.num_threads">${__jexl3( ${__P(pd.modifyPerSec,0)} &gt; 0 ? ${__P(pd.modifyThreads,10)} : 0 )}</stringProp>
         <stringProp name="ThreadGroup.ramp_time">5</stringProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.duration">${__P(pd.durationSec,7200)}</stringProp>
@@ -337,12 +366,12 @@
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">bind</stringProp>
           <boolProp name="secure">true</boolProp>
-          <boolProp name="trustAll">true</boolProp>
+          <boolProp name="trustall">true</boolProp>
           <stringProp name="user_dn">${__P(pd.bindDN,)}</stringProp>
           <stringProp name="user_pw">${__P(pd.bindPw,)}</stringProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -355,20 +384,51 @@
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">modify</stringProp>
           <stringProp name="base_entry_dn">${__P(pd.modifyTargetDN,uid=tommytester)}</stringProp>
-          <elementProp name="arguments" elementType="LDAPArguments" guiclass="org.apache.jmeter.protocol.ldap.config.gui.LDAPArgumentsPanel" testclass="LDAPArguments" testname="LDAPArguments" enabled="true">
+          <elementProp name="ldaparguments" elementType="LDAPArguments" guiclass="org.apache.jmeter.protocol.ldap.config.gui.LDAPArgumentsPanel" testclass="LDAPArguments" testname="LDAPArguments" enabled="true">
             <collectionProp name="Arguments.arguments">
             <elementProp name="sn" elementType="LDAPArgument">
               <stringProp name="Argument.name">sn</stringProp>
               <stringProp name="Argument.value">modified-${__time()}</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
-              <stringProp name="opcode">replace</stringProp>
+              <stringProp name="Argument.opcode">replace</stringProp>
               <stringProp name="Argument.desc"></stringProp>
             </elementProp>
             </collectionProp>
           </elementProp>
           <stringProp name="scope">2</stringProp>
-          <stringProp name="countlim">0</stringProp>
-          <stringProp name="timelim">0</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
+          <stringProp name="attributes"></stringProp>
+          <boolProp name="return_object">false</boolProp>
+          <boolProp name="deref_aliases">false</boolProp>
+          <boolProp name="parseflag">false</boolProp>
+          <stringProp name="connection_timeout">5000</stringProp>
+        </org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler>
+        <hashTree>
+          <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Rate (samples/min)" enabled="true">
+            <intProp name="calcMode">4</intProp>
+            <stringProp name="throughput">${__jexl3( ${__P(pd.modifyPerSec,0)} &gt; 0 ? ((${__P(pd.modifyPerSec,0)} * 60.0) * (1 + (${__P(pd.rampStepPercent,30)}/100.0) * ((${__time()} - ${START})/1000.0/${__P(pd.rampStepSeconds,120)}))) : 0.001 )}</stringProp>
+          </ConstantThroughputTimer>
+          <hashTree/>
+        </hashTree>
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Reconnect if connection lost" enabled="true">
+          <stringProp name="IfController.condition">${__jexl3(!ctx.getPreviousResult().isSuccessful() &amp;&amp; ctx.getPreviousResult().getResponseCode() == "800")}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree>
+        <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Reconnect" enabled="true">
+          <stringProp name="servername">${__P(pd.hostWrite,localhost)}</stringProp>
+          <stringProp name="port">${__P(pd.port,1636)}</stringProp>
+          <stringProp name="rootdn">${BASEDN}</stringProp>
+          <stringProp name="test">bind</stringProp>
+          <boolProp name="secure">true</boolProp>
+          <boolProp name="trustall">true</boolProp>
+          <stringProp name="user_dn">${__P(pd.bindDN,)}</stringProp>
+          <stringProp name="user_pw">${__P(pd.bindPw,)}</stringProp>
+          <stringProp name="scope">2</stringProp>
+          <stringProp name="countlimit">0</stringProp>
+          <stringProp name="timelimit">0</stringProp>
           <stringProp name="attributes"></stringProp>
           <boolProp name="return_object">false</boolProp>
           <boolProp name="deref_aliases">false</boolProp>
@@ -376,11 +436,7 @@
           <stringProp name="connection_timeout">5000</stringProp>
         </org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler>
         <hashTree/>
-        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Rate (samples/min)" enabled="true">
-          <intProp name="calcMode">2</intProp>
-          <stringProp name="throughput">${__jexl3( ${__P(pd.modifyPerSec,0)} &gt; 0 ? ((${__P(pd.modifyPerSec,0)} * 60.0) * (1 + (${__P(pd.rampStepPercent,30)}/100.0) * ((${__time()} - ${START})/1000.0/${__P(pd.rampStepSeconds,120)}))) : 0.001 )}</stringProp>
-        </ConstantThroughputTimer>
-        <hashTree/>
+        </hashTree>
       </hashTree>
     </hashTree>
   </hashTree>
