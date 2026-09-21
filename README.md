@@ -4,8 +4,8 @@ This kit puts a controlled amount of traffic on PingDirectory so you can see how
 it copes. Two ready-made tests. Fill in a few lines and run.
 
 It uses JMeter's built-in LDAP samplers, so it runs on any modern Java (Java 17
-or newer) with no extra setup. Test records are created under a dedicated
-`ou=loadgen` branch beneath your base DN, so they're easy to find and remove.
+or newer) with no extra setup. Test records are created directly under the base DN you specify, and named
+`uid=e-...` so they're easy to find and remove.
 
 ---
 
@@ -98,18 +98,23 @@ kubectl top  pods -n userstore-blue -l app.kubernetes.io/name=pingdirectory
 
 ## Cleaning up test records
 
-Adds create records under `ou=loadgen` beneath your base DN. Deletes during the
-run remove some; if you add faster than you delete, the rest stay after the run.
-To remove them all, purge that one branch (adjust host, port, and bind):
+Adds create records **directly under your base DN**, named `uid=e-...`. Deletes
+during the run remove some; if you add faster than you delete, the rest stay
+after the run. To remove any leftovers, delete the `uid=e-*` entries under your
+base DN (adjust host, port, bind, and base DN):
 
 ```
-ldapdelete --hostname YOUR_HOST --port 1636 --useSSL --trustAll \
+ldapsearch --hostname YOUR_HOST --port 1636 --useSSL --trustAll \
   --bindDN "YOUR_BIND_DN" --bindPassword "YOUR_PASSWORD" \
-  --deleteSubtree "ou=loadgen,ou=test,o=TUCUSTOMERSTAGE"
+  --baseDN "ou=test,o=TUCUSTOMERSTAGE" --searchScope one "(uid=e-*)" "1.1" \
+  | grep "^dn:" | sed "s/^dn: //" \
+  | ldapdelete --hostname YOUR_HOST --port 1636 --useSSL --trustAll \
+      --bindDN "YOUR_BIND_DN" --bindPassword "YOUR_PASSWORD"
 ```
 
-(`ldapdelete` ships with PingDirectory, in its `bin` folder. On Windows use
-`ldapdelete.bat`.)
+(`ldapsearch` and `ldapdelete` ship with PingDirectory, in its `bin` folder. On
+Windows use the `.bat` versions. Run the `ldapsearch` part alone first to see
+what would be deleted.)
 
 ---
 
@@ -123,8 +128,7 @@ very first time on a new machine:
 2. Set small numbers in settings (search 5, add 1, delete 1), run Test 1 for a
    minute, and open the report.
 3. Confirm the Search and Add rows are mostly green. If Add fails, check the bind
-   login can create entries under `ou=test`, and that `ou=loadgen` got created
-   (the test tries to create it automatically at the start).
+   login can create entries under `ou=test`, and the records appear under your base DN.
 
 Once that looks good, set your real numbers.
 

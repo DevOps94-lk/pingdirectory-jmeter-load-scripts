@@ -42,4 +42,4 @@ rm -rf out/test1 && mkdir -p out/test1
 echo ">> Running Test 1 (sustained, ~30 min). Report will be out/test1/report/index.html"
 jmeter -n -t pingdir-test1-sustained.jmx -q settings.properties -l out/test1/results.jtl -e -o out/test1/report
 echo ">> DONE. Open in a browser:  out/test1/report/index.html"
-echo ">> To remove leftover test records, purge the ou=loadgen branch (see README)."
+echo ">> To remove leftover test records, see the cleanup command in the README."
