@@ -166,7 +166,7 @@
         <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Add" enabled="true">
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">add</stringProp>
-          <stringProp name="base_entry_dn">uid=e-${RUNID}-${ADDID}</stringProp>
+          <stringProp name="base_entry_dn">uid=e-${RUNID}-${__machineName}-${ADDID}</stringProp>
           <elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments">
             <elementProp name="objectClass" elementType="Argument">
@@ -191,7 +191,7 @@
             </elementProp>
             <elementProp name="uid" elementType="Argument">
               <stringProp name="Argument.name">uid</stringProp>
-              <stringProp name="Argument.value">e-${RUNID}-${ADDID}</stringProp>
+              <stringProp name="Argument.value">e-${RUNID}-${__machineName}-${ADDID}</stringProp>
               <stringProp name="Argument.metadata">=</stringProp>
             </elementProp>
             <elementProp name="cn" elementType="Argument">
@@ -301,7 +301,7 @@
         <org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler guiclass="org.apache.jmeter.protocol.ldap.control.gui.LdapExtTestSamplerGui" testclass="org.apache.jmeter.protocol.ldap.sampler.LDAPExtSampler" testname="Delete" enabled="true">
           <stringProp name="rootdn">${BASEDN}</stringProp>
           <stringProp name="test">delete</stringProp>
-          <stringProp name="delete">uid=e-${RUNID}-${DELID}</stringProp>
+          <stringProp name="delete">uid=e-${RUNID}-${__machineName}-${DELID}</stringProp>
           <stringProp name="scope">2</stringProp>
           <stringProp name="countlimit">0</stringProp>
           <stringProp name="timelimit">0</stringProp>
