@@ -1,0 +1,2740 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+<hashTree>
+<TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="LDAP sustained load - stepped ramp (standard thread groups)">
+<stringProp name="TestPlan.comments">Settings from ldap-sustained-load.properties (-q). Waves of threads start every ldap.stepEverySec and all stop at ldap.totalSec. No plugins.</stringProp>
+<boolProp name="TestPlan.functional_mode">false</boolProp>
+<boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+<elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+<collectionProp name="Arguments.arguments">
+<elementProp name="TESTOU" elementType="Argument"><stringProp name="Argument.name">TESTOU</stringProp><stringProp name="Argument.value">${__P(ldap.testOuDN,)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+</collectionProp>
+</elementProp>
+</TestPlan>
+<hashTree>
+<ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Wave 1 of 5 (starts at 0 x ldap.stepEverySec)" enabled="true">
+<stringProp name="ThreadGroup.num_threads">${__P(ldap.stepThreads,10)}</stringProp>
+<stringProp name="ThreadGroup.ramp_time">${__P(ldap.rampSec,30)}</stringProp>
+<boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+<stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+<boolProp name="ThreadGroup.scheduler">true</boolProp>
+<stringProp name="ThreadGroup.duration">${__jexl3(${__P(ldap.totalSec,1500)} - 0 * ${__P(ldap.stepEverySec,300)})}</stringProp>
+<stringProp name="ThreadGroup.delay">${__jexl3(0 * ${__P(ldap.stepEverySec,300)})}</stringProp>
+<elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+<stringProp name="LoopController.loops">-1</stringProp>
+<boolProp name="LoopController.continue_forever">false</boolProp>
+</elementProp>
+</ThreadGroup>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 01 admin" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">${__P(ldap.bindDN,)}</stringProp>
+<stringProp name="user_pw">${__P(ldap.bindPw,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 02 admin, test OU" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">0</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">1.1</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(objectClass=*)</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="OU found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Test OU not found: check ldap.testOuDN and admin access</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+</hashTree>
+<LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Create / modify / delete cycles" enabled="true">
+<stringProp name="LoopController.loops">${__P(ldap.cycles,3)}</stringProp>
+<boolProp name="LoopController.continue_forever">true</boolProp>
+</LoopController>
+<hashTree>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin connection usable?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult() == null || (ctx.getPreviousResult().getResponseCode() != &quot;800&quot; &amp;&amp; ctx.getPreviousResult().getResponseCode() != &quot;500&quot;))}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="ADD - 03 admin adds user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">add</stringProp>
+<stringProp name="base_entry_dn">uid=${UID}</stringProp>
+<elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+<collectionProp name="Arguments.arguments">
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">top</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">person</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">organizationalPerson</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">inetOrgPerson</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="uid" elementType="Argument"><stringProp name="Argument.name">uid</stringProp><stringProp name="Argument.value">${UID}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="cn" elementType="Argument"><stringProp name="Argument.name">cn</stringProp><stringProp name="Argument.value">LoadUser ${UID}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="sn" elementType="Argument"><stringProp name="Argument.name">sn</stringProp><stringProp name="Argument.value">LoadTest</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="mail" elementType="Argument"><stringProp name="Argument.name">mail</stringProp><stringProp name="Argument.value">${UID}@${__P(ldap.mailDomain,loadtest.example)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="description" elementType="Argument"><stringProp name="Argument.name">description</stringProp><stringProp name="Argument.value">${__P(ldap.description,LDAP-LOADTEST)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="userPassword" elementType="Argument"><stringProp name="Argument.name">userPassword</stringProp><stringProp name="Argument.value">${__P(ldap.userPassword,)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+</collectionProp>
+</elementProp>
+</LDAPExtSampler>
+<hashTree>
+<UserParameters guiclass="UserParametersGui" testclass="UserParameters" testname="New unique uid for this cycle" enabled="true">
+<collectionProp name="UserParameters.names"><stringProp name="0">UID</stringProp></collectionProp>
+<collectionProp name="UserParameters.thread_values"><collectionProp name="0"><stringProp name="0">lt-${__UUID()}</stringProp></collectionProp></collectionProp>
+<boolProp name="UserParameters.per_iteration">false</boolProp>
+</UserParameters>
+<hashTree/>
+</hashTree>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Add succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 04 admin (close admin connection before the user binds)" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 05 user" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">uid=${UID},${TESTOU}</stringProp>
+<stringProp name="user_pw">${__P(ldap.userPassword,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="User bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 06 user, own entry" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">User could not read its own entry</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="uid matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">user read a different entry</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 07 user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 08 admin re-bind" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">${__P(ldap.bindDN,)}</stringProp>
+<stringProp name="user_pw">${__P(ldap.bindPw,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin re-bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 09 admin, added user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Added user not found</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="cn matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadUser ${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">cn does not match what was added</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="uid matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">uid does not match what was added</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="MODIFY - 10 admin, cn+sn" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">modify</stringProp>
+<stringProp name="base_entry_dn">uid=${UID}</stringProp>
+<elementProp name="ldaparguments" elementType="LDAPArguments" guiclass="LDAPArgumentsPanel" testclass="LDAPArguments" testname="LDAPArguments">
+<collectionProp name="Arguments.arguments">
+<elementProp name="cn" elementType="LDAPArgument"><stringProp name="Argument.name">cn</stringProp><stringProp name="Argument.value">LoadUser ${UID} UPD</stringProp><stringProp name="Argument.metadata">=</stringProp><stringProp name="Argument.opcode">replace</stringProp><stringProp name="Argument.desc"></stringProp></elementProp>
+<elementProp name="sn" elementType="LDAPArgument"><stringProp name="Argument.name">sn</stringProp><stringProp name="Argument.value">LoadTest-UPD</stringProp><stringProp name="Argument.metadata">=</stringProp><stringProp name="Argument.opcode">replace</stringProp><stringProp name="Argument.desc"></stringProp></elementProp>
+</collectionProp>
+</elementProp>
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 11 admin, modified user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Modified user not found</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="cn updated" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadUser ${UID} UPD</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">VALIDATION FAILED: cn not updated</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="sn updated" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadTest-UPD</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">VALIDATION FAILED: sn not updated</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="DELETE - 12 admin deletes user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">delete</stringProp>
+<stringProp name="delete">uid=${UID}</stringProp>
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 13 admin, deleted user (must not exist)" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="must be gone" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Deleted user STILL EXISTS</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">20</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+</hashTree>
+</hashTree>
+</hashTree>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 14 admin" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+</hashTree>
+<ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Wave 2 of 5 (starts at 1 x ldap.stepEverySec)" enabled="true">
+<stringProp name="ThreadGroup.num_threads">${__P(ldap.stepThreads,10)}</stringProp>
+<stringProp name="ThreadGroup.ramp_time">${__P(ldap.rampSec,30)}</stringProp>
+<boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+<stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+<boolProp name="ThreadGroup.scheduler">true</boolProp>
+<stringProp name="ThreadGroup.duration">${__jexl3(${__P(ldap.totalSec,1500)} - 1 * ${__P(ldap.stepEverySec,300)})}</stringProp>
+<stringProp name="ThreadGroup.delay">${__jexl3(1 * ${__P(ldap.stepEverySec,300)})}</stringProp>
+<elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+<stringProp name="LoopController.loops">-1</stringProp>
+<boolProp name="LoopController.continue_forever">false</boolProp>
+</elementProp>
+</ThreadGroup>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 01 admin" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">${__P(ldap.bindDN,)}</stringProp>
+<stringProp name="user_pw">${__P(ldap.bindPw,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 02 admin, test OU" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">0</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">1.1</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(objectClass=*)</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="OU found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Test OU not found: check ldap.testOuDN and admin access</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+</hashTree>
+<LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Create / modify / delete cycles" enabled="true">
+<stringProp name="LoopController.loops">${__P(ldap.cycles,3)}</stringProp>
+<boolProp name="LoopController.continue_forever">true</boolProp>
+</LoopController>
+<hashTree>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin connection usable?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult() == null || (ctx.getPreviousResult().getResponseCode() != &quot;800&quot; &amp;&amp; ctx.getPreviousResult().getResponseCode() != &quot;500&quot;))}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="ADD - 03 admin adds user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">add</stringProp>
+<stringProp name="base_entry_dn">uid=${UID}</stringProp>
+<elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+<collectionProp name="Arguments.arguments">
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">top</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">person</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">organizationalPerson</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">inetOrgPerson</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="uid" elementType="Argument"><stringProp name="Argument.name">uid</stringProp><stringProp name="Argument.value">${UID}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="cn" elementType="Argument"><stringProp name="Argument.name">cn</stringProp><stringProp name="Argument.value">LoadUser ${UID}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="sn" elementType="Argument"><stringProp name="Argument.name">sn</stringProp><stringProp name="Argument.value">LoadTest</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="mail" elementType="Argument"><stringProp name="Argument.name">mail</stringProp><stringProp name="Argument.value">${UID}@${__P(ldap.mailDomain,loadtest.example)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="description" elementType="Argument"><stringProp name="Argument.name">description</stringProp><stringProp name="Argument.value">${__P(ldap.description,LDAP-LOADTEST)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="userPassword" elementType="Argument"><stringProp name="Argument.name">userPassword</stringProp><stringProp name="Argument.value">${__P(ldap.userPassword,)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+</collectionProp>
+</elementProp>
+</LDAPExtSampler>
+<hashTree>
+<UserParameters guiclass="UserParametersGui" testclass="UserParameters" testname="New unique uid for this cycle" enabled="true">
+<collectionProp name="UserParameters.names"><stringProp name="0">UID</stringProp></collectionProp>
+<collectionProp name="UserParameters.thread_values"><collectionProp name="0"><stringProp name="0">lt-${__UUID()}</stringProp></collectionProp></collectionProp>
+<boolProp name="UserParameters.per_iteration">false</boolProp>
+</UserParameters>
+<hashTree/>
+</hashTree>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Add succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 04 admin (close admin connection before the user binds)" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 05 user" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">uid=${UID},${TESTOU}</stringProp>
+<stringProp name="user_pw">${__P(ldap.userPassword,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="User bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 06 user, own entry" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">User could not read its own entry</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="uid matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">user read a different entry</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 07 user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 08 admin re-bind" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">${__P(ldap.bindDN,)}</stringProp>
+<stringProp name="user_pw">${__P(ldap.bindPw,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin re-bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 09 admin, added user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Added user not found</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="cn matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadUser ${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">cn does not match what was added</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="uid matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">uid does not match what was added</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="MODIFY - 10 admin, cn+sn" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">modify</stringProp>
+<stringProp name="base_entry_dn">uid=${UID}</stringProp>
+<elementProp name="ldaparguments" elementType="LDAPArguments" guiclass="LDAPArgumentsPanel" testclass="LDAPArguments" testname="LDAPArguments">
+<collectionProp name="Arguments.arguments">
+<elementProp name="cn" elementType="LDAPArgument"><stringProp name="Argument.name">cn</stringProp><stringProp name="Argument.value">LoadUser ${UID} UPD</stringProp><stringProp name="Argument.metadata">=</stringProp><stringProp name="Argument.opcode">replace</stringProp><stringProp name="Argument.desc"></stringProp></elementProp>
+<elementProp name="sn" elementType="LDAPArgument"><stringProp name="Argument.name">sn</stringProp><stringProp name="Argument.value">LoadTest-UPD</stringProp><stringProp name="Argument.metadata">=</stringProp><stringProp name="Argument.opcode">replace</stringProp><stringProp name="Argument.desc"></stringProp></elementProp>
+</collectionProp>
+</elementProp>
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 11 admin, modified user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Modified user not found</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="cn updated" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadUser ${UID} UPD</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">VALIDATION FAILED: cn not updated</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="sn updated" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadTest-UPD</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">VALIDATION FAILED: sn not updated</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="DELETE - 12 admin deletes user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">delete</stringProp>
+<stringProp name="delete">uid=${UID}</stringProp>
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 13 admin, deleted user (must not exist)" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="must be gone" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Deleted user STILL EXISTS</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">20</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+</hashTree>
+</hashTree>
+</hashTree>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 14 admin" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+</hashTree>
+<ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Wave 3 of 5 (starts at 2 x ldap.stepEverySec)" enabled="true">
+<stringProp name="ThreadGroup.num_threads">${__P(ldap.stepThreads,10)}</stringProp>
+<stringProp name="ThreadGroup.ramp_time">${__P(ldap.rampSec,30)}</stringProp>
+<boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+<stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+<boolProp name="ThreadGroup.scheduler">true</boolProp>
+<stringProp name="ThreadGroup.duration">${__jexl3(${__P(ldap.totalSec,1500)} - 2 * ${__P(ldap.stepEverySec,300)})}</stringProp>
+<stringProp name="ThreadGroup.delay">${__jexl3(2 * ${__P(ldap.stepEverySec,300)})}</stringProp>
+<elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+<stringProp name="LoopController.loops">-1</stringProp>
+<boolProp name="LoopController.continue_forever">false</boolProp>
+</elementProp>
+</ThreadGroup>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 01 admin" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">${__P(ldap.bindDN,)}</stringProp>
+<stringProp name="user_pw">${__P(ldap.bindPw,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 02 admin, test OU" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">0</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">1.1</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(objectClass=*)</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="OU found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Test OU not found: check ldap.testOuDN and admin access</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+</hashTree>
+<LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Create / modify / delete cycles" enabled="true">
+<stringProp name="LoopController.loops">${__P(ldap.cycles,3)}</stringProp>
+<boolProp name="LoopController.continue_forever">true</boolProp>
+</LoopController>
+<hashTree>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin connection usable?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult() == null || (ctx.getPreviousResult().getResponseCode() != &quot;800&quot; &amp;&amp; ctx.getPreviousResult().getResponseCode() != &quot;500&quot;))}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="ADD - 03 admin adds user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">add</stringProp>
+<stringProp name="base_entry_dn">uid=${UID}</stringProp>
+<elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+<collectionProp name="Arguments.arguments">
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">top</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">person</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">organizationalPerson</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">inetOrgPerson</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="uid" elementType="Argument"><stringProp name="Argument.name">uid</stringProp><stringProp name="Argument.value">${UID}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="cn" elementType="Argument"><stringProp name="Argument.name">cn</stringProp><stringProp name="Argument.value">LoadUser ${UID}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="sn" elementType="Argument"><stringProp name="Argument.name">sn</stringProp><stringProp name="Argument.value">LoadTest</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="mail" elementType="Argument"><stringProp name="Argument.name">mail</stringProp><stringProp name="Argument.value">${UID}@${__P(ldap.mailDomain,loadtest.example)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="description" elementType="Argument"><stringProp name="Argument.name">description</stringProp><stringProp name="Argument.value">${__P(ldap.description,LDAP-LOADTEST)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="userPassword" elementType="Argument"><stringProp name="Argument.name">userPassword</stringProp><stringProp name="Argument.value">${__P(ldap.userPassword,)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+</collectionProp>
+</elementProp>
+</LDAPExtSampler>
+<hashTree>
+<UserParameters guiclass="UserParametersGui" testclass="UserParameters" testname="New unique uid for this cycle" enabled="true">
+<collectionProp name="UserParameters.names"><stringProp name="0">UID</stringProp></collectionProp>
+<collectionProp name="UserParameters.thread_values"><collectionProp name="0"><stringProp name="0">lt-${__UUID()}</stringProp></collectionProp></collectionProp>
+<boolProp name="UserParameters.per_iteration">false</boolProp>
+</UserParameters>
+<hashTree/>
+</hashTree>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Add succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 04 admin (close admin connection before the user binds)" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 05 user" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">uid=${UID},${TESTOU}</stringProp>
+<stringProp name="user_pw">${__P(ldap.userPassword,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="User bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 06 user, own entry" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">User could not read its own entry</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="uid matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">user read a different entry</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 07 user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 08 admin re-bind" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">${__P(ldap.bindDN,)}</stringProp>
+<stringProp name="user_pw">${__P(ldap.bindPw,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin re-bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 09 admin, added user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Added user not found</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="cn matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadUser ${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">cn does not match what was added</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="uid matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">uid does not match what was added</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="MODIFY - 10 admin, cn+sn" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">modify</stringProp>
+<stringProp name="base_entry_dn">uid=${UID}</stringProp>
+<elementProp name="ldaparguments" elementType="LDAPArguments" guiclass="LDAPArgumentsPanel" testclass="LDAPArguments" testname="LDAPArguments">
+<collectionProp name="Arguments.arguments">
+<elementProp name="cn" elementType="LDAPArgument"><stringProp name="Argument.name">cn</stringProp><stringProp name="Argument.value">LoadUser ${UID} UPD</stringProp><stringProp name="Argument.metadata">=</stringProp><stringProp name="Argument.opcode">replace</stringProp><stringProp name="Argument.desc"></stringProp></elementProp>
+<elementProp name="sn" elementType="LDAPArgument"><stringProp name="Argument.name">sn</stringProp><stringProp name="Argument.value">LoadTest-UPD</stringProp><stringProp name="Argument.metadata">=</stringProp><stringProp name="Argument.opcode">replace</stringProp><stringProp name="Argument.desc"></stringProp></elementProp>
+</collectionProp>
+</elementProp>
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 11 admin, modified user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Modified user not found</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="cn updated" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadUser ${UID} UPD</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">VALIDATION FAILED: cn not updated</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="sn updated" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadTest-UPD</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">VALIDATION FAILED: sn not updated</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="DELETE - 12 admin deletes user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">delete</stringProp>
+<stringProp name="delete">uid=${UID}</stringProp>
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 13 admin, deleted user (must not exist)" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="must be gone" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Deleted user STILL EXISTS</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">20</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+</hashTree>
+</hashTree>
+</hashTree>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 14 admin" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+</hashTree>
+<ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Wave 4 of 5 (starts at 3 x ldap.stepEverySec)" enabled="true">
+<stringProp name="ThreadGroup.num_threads">${__P(ldap.stepThreads,10)}</stringProp>
+<stringProp name="ThreadGroup.ramp_time">${__P(ldap.rampSec,30)}</stringProp>
+<boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+<stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+<boolProp name="ThreadGroup.scheduler">true</boolProp>
+<stringProp name="ThreadGroup.duration">${__jexl3(${__P(ldap.totalSec,1500)} - 3 * ${__P(ldap.stepEverySec,300)})}</stringProp>
+<stringProp name="ThreadGroup.delay">${__jexl3(3 * ${__P(ldap.stepEverySec,300)})}</stringProp>
+<elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+<stringProp name="LoopController.loops">-1</stringProp>
+<boolProp name="LoopController.continue_forever">false</boolProp>
+</elementProp>
+</ThreadGroup>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 01 admin" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">${__P(ldap.bindDN,)}</stringProp>
+<stringProp name="user_pw">${__P(ldap.bindPw,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 02 admin, test OU" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">0</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">1.1</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(objectClass=*)</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="OU found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Test OU not found: check ldap.testOuDN and admin access</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+</hashTree>
+<LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Create / modify / delete cycles" enabled="true">
+<stringProp name="LoopController.loops">${__P(ldap.cycles,3)}</stringProp>
+<boolProp name="LoopController.continue_forever">true</boolProp>
+</LoopController>
+<hashTree>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin connection usable?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult() == null || (ctx.getPreviousResult().getResponseCode() != &quot;800&quot; &amp;&amp; ctx.getPreviousResult().getResponseCode() != &quot;500&quot;))}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="ADD - 03 admin adds user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">add</stringProp>
+<stringProp name="base_entry_dn">uid=${UID}</stringProp>
+<elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+<collectionProp name="Arguments.arguments">
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">top</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">person</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">organizationalPerson</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">inetOrgPerson</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="uid" elementType="Argument"><stringProp name="Argument.name">uid</stringProp><stringProp name="Argument.value">${UID}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="cn" elementType="Argument"><stringProp name="Argument.name">cn</stringProp><stringProp name="Argument.value">LoadUser ${UID}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="sn" elementType="Argument"><stringProp name="Argument.name">sn</stringProp><stringProp name="Argument.value">LoadTest</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="mail" elementType="Argument"><stringProp name="Argument.name">mail</stringProp><stringProp name="Argument.value">${UID}@${__P(ldap.mailDomain,loadtest.example)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="description" elementType="Argument"><stringProp name="Argument.name">description</stringProp><stringProp name="Argument.value">${__P(ldap.description,LDAP-LOADTEST)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="userPassword" elementType="Argument"><stringProp name="Argument.name">userPassword</stringProp><stringProp name="Argument.value">${__P(ldap.userPassword,)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+</collectionProp>
+</elementProp>
+</LDAPExtSampler>
+<hashTree>
+<UserParameters guiclass="UserParametersGui" testclass="UserParameters" testname="New unique uid for this cycle" enabled="true">
+<collectionProp name="UserParameters.names"><stringProp name="0">UID</stringProp></collectionProp>
+<collectionProp name="UserParameters.thread_values"><collectionProp name="0"><stringProp name="0">lt-${__UUID()}</stringProp></collectionProp></collectionProp>
+<boolProp name="UserParameters.per_iteration">false</boolProp>
+</UserParameters>
+<hashTree/>
+</hashTree>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Add succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 04 admin (close admin connection before the user binds)" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 05 user" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">uid=${UID},${TESTOU}</stringProp>
+<stringProp name="user_pw">${__P(ldap.userPassword,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="User bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 06 user, own entry" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">User could not read its own entry</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="uid matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">user read a different entry</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 07 user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 08 admin re-bind" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">${__P(ldap.bindDN,)}</stringProp>
+<stringProp name="user_pw">${__P(ldap.bindPw,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin re-bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 09 admin, added user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Added user not found</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="cn matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadUser ${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">cn does not match what was added</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="uid matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">uid does not match what was added</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="MODIFY - 10 admin, cn+sn" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">modify</stringProp>
+<stringProp name="base_entry_dn">uid=${UID}</stringProp>
+<elementProp name="ldaparguments" elementType="LDAPArguments" guiclass="LDAPArgumentsPanel" testclass="LDAPArguments" testname="LDAPArguments">
+<collectionProp name="Arguments.arguments">
+<elementProp name="cn" elementType="LDAPArgument"><stringProp name="Argument.name">cn</stringProp><stringProp name="Argument.value">LoadUser ${UID} UPD</stringProp><stringProp name="Argument.metadata">=</stringProp><stringProp name="Argument.opcode">replace</stringProp><stringProp name="Argument.desc"></stringProp></elementProp>
+<elementProp name="sn" elementType="LDAPArgument"><stringProp name="Argument.name">sn</stringProp><stringProp name="Argument.value">LoadTest-UPD</stringProp><stringProp name="Argument.metadata">=</stringProp><stringProp name="Argument.opcode">replace</stringProp><stringProp name="Argument.desc"></stringProp></elementProp>
+</collectionProp>
+</elementProp>
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 11 admin, modified user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Modified user not found</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="cn updated" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadUser ${UID} UPD</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">VALIDATION FAILED: cn not updated</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="sn updated" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadTest-UPD</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">VALIDATION FAILED: sn not updated</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="DELETE - 12 admin deletes user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">delete</stringProp>
+<stringProp name="delete">uid=${UID}</stringProp>
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 13 admin, deleted user (must not exist)" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="must be gone" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Deleted user STILL EXISTS</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">20</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+</hashTree>
+</hashTree>
+</hashTree>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 14 admin" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+</hashTree>
+<ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Wave 5 of 5 (starts at 4 x ldap.stepEverySec)" enabled="true">
+<stringProp name="ThreadGroup.num_threads">${__P(ldap.stepThreads,10)}</stringProp>
+<stringProp name="ThreadGroup.ramp_time">${__P(ldap.rampSec,30)}</stringProp>
+<boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+<stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+<boolProp name="ThreadGroup.scheduler">true</boolProp>
+<stringProp name="ThreadGroup.duration">${__jexl3(${__P(ldap.totalSec,1500)} - 4 * ${__P(ldap.stepEverySec,300)})}</stringProp>
+<stringProp name="ThreadGroup.delay">${__jexl3(4 * ${__P(ldap.stepEverySec,300)})}</stringProp>
+<elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+<stringProp name="LoopController.loops">-1</stringProp>
+<boolProp name="LoopController.continue_forever">false</boolProp>
+</elementProp>
+</ThreadGroup>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 01 admin" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">${__P(ldap.bindDN,)}</stringProp>
+<stringProp name="user_pw">${__P(ldap.bindPw,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 02 admin, test OU" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">0</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">1.1</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(objectClass=*)</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="OU found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Test OU not found: check ldap.testOuDN and admin access</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+</hashTree>
+<LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Create / modify / delete cycles" enabled="true">
+<stringProp name="LoopController.loops">${__P(ldap.cycles,3)}</stringProp>
+<boolProp name="LoopController.continue_forever">true</boolProp>
+</LoopController>
+<hashTree>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin connection usable?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult() == null || (ctx.getPreviousResult().getResponseCode() != &quot;800&quot; &amp;&amp; ctx.getPreviousResult().getResponseCode() != &quot;500&quot;))}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="ADD - 03 admin adds user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">add</stringProp>
+<stringProp name="base_entry_dn">uid=${UID}</stringProp>
+<elementProp name="arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+<collectionProp name="Arguments.arguments">
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">top</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">person</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">organizationalPerson</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="objectClass" elementType="Argument"><stringProp name="Argument.name">objectClass</stringProp><stringProp name="Argument.value">inetOrgPerson</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="uid" elementType="Argument"><stringProp name="Argument.name">uid</stringProp><stringProp name="Argument.value">${UID}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="cn" elementType="Argument"><stringProp name="Argument.name">cn</stringProp><stringProp name="Argument.value">LoadUser ${UID}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="sn" elementType="Argument"><stringProp name="Argument.name">sn</stringProp><stringProp name="Argument.value">LoadTest</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="mail" elementType="Argument"><stringProp name="Argument.name">mail</stringProp><stringProp name="Argument.value">${UID}@${__P(ldap.mailDomain,loadtest.example)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="description" elementType="Argument"><stringProp name="Argument.name">description</stringProp><stringProp name="Argument.value">${__P(ldap.description,LDAP-LOADTEST)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+<elementProp name="userPassword" elementType="Argument"><stringProp name="Argument.name">userPassword</stringProp><stringProp name="Argument.value">${__P(ldap.userPassword,)}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>
+</collectionProp>
+</elementProp>
+</LDAPExtSampler>
+<hashTree>
+<UserParameters guiclass="UserParametersGui" testclass="UserParameters" testname="New unique uid for this cycle" enabled="true">
+<collectionProp name="UserParameters.names"><stringProp name="0">UID</stringProp></collectionProp>
+<collectionProp name="UserParameters.thread_values"><collectionProp name="0"><stringProp name="0">lt-${__UUID()}</stringProp></collectionProp></collectionProp>
+<boolProp name="UserParameters.per_iteration">false</boolProp>
+</UserParameters>
+<hashTree/>
+</hashTree>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Add succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 04 admin (close admin connection before the user binds)" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 05 user" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">uid=${UID},${TESTOU}</stringProp>
+<stringProp name="user_pw">${__P(ldap.userPassword,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="User bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 06 user, own entry" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">User could not read its own entry</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="uid matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">user read a different entry</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 07 user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 08 admin re-bind" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">${__P(ldap.bindDN,)}</stringProp>
+<stringProp name="user_pw">${__P(ldap.bindPw,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin re-bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 09 admin, added user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Added user not found</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="cn matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadUser ${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">cn does not match what was added</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="uid matches" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">${UID}</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">uid does not match what was added</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="MODIFY - 10 admin, cn+sn" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">modify</stringProp>
+<stringProp name="base_entry_dn">uid=${UID}</stringProp>
+<elementProp name="ldaparguments" elementType="LDAPArguments" guiclass="LDAPArgumentsPanel" testclass="LDAPArguments" testname="LDAPArguments">
+<collectionProp name="Arguments.arguments">
+<elementProp name="cn" elementType="LDAPArgument"><stringProp name="Argument.name">cn</stringProp><stringProp name="Argument.value">LoadUser ${UID} UPD</stringProp><stringProp name="Argument.metadata">=</stringProp><stringProp name="Argument.opcode">replace</stringProp><stringProp name="Argument.desc"></stringProp></elementProp>
+<elementProp name="sn" elementType="LDAPArgument"><stringProp name="Argument.name">sn</stringProp><stringProp name="Argument.value">LoadTest-UPD</stringProp><stringProp name="Argument.metadata">=</stringProp><stringProp name="Argument.opcode">replace</stringProp><stringProp name="Argument.desc"></stringProp></elementProp>
+</collectionProp>
+</elementProp>
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 11 admin, modified user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid;cn;sn;mail;description</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Entry found" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Modified user not found</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="cn updated" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadUser ${UID} UPD</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">VALIDATION FAILED: cn not updated</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="sn updated" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">LoadTest-UPD</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">VALIDATION FAILED: sn not updated</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">16</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="DELETE - 12 admin deletes user" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">delete</stringProp>
+<stringProp name="delete">uid=${UID}</stringProp>
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 13 admin, deleted user (must not exist)" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">uid</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(uid=${UID})</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="must be gone" enabled="true">
+<collectionProp name="Asserion.test_strings"><stringProp name="0">&lt;searchresult&gt;</stringProp></collectionProp>
+<stringProp name="Assertion.custom_message">Deleted user STILL EXISTS</stringProp>
+<stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+<boolProp name="Assertion.assume_success">false</boolProp>
+<intProp name="Assertion.test_type">20</intProp>
+</ResponseAssertion>
+<hashTree/>
+</hashTree>
+</hashTree>
+</hashTree>
+</hashTree>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 14 admin" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+</hashTree>
+<PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="Cleanup (after the test ends): delete leftover test users" enabled="true">
+<intProp name="ThreadGroup.num_threads">1</intProp>
+<intProp name="ThreadGroup.ramp_time">1</intProp>
+<boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+<stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+<elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+<stringProp name="LoopController.loops">1</stringProp>
+<boolProp name="LoopController.continue_forever">false</boolProp>
+</elementProp>
+</PostThreadGroup>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="TD bind admin" enabled="true">
+<stringProp name="servername">${__P(ldap.host,)}</stringProp>
+<stringProp name="port">${__P(ldap.port,1636)}</stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">true</stringProp>
+<stringProp name="trustall">true</stringProp>
+<stringProp name="user_dn">${__P(ldap.bindDN,)}</stringProp>
+<stringProp name="user_pw">${__P(ldap.bindPw,)}</stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">bind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Only if the admin bind worked" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="TD find leftover test users" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes">1.1</stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">true</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">search</stringProp>
+<stringProp name="search"></stringProp>
+<stringProp name="searchfilter">(&amp;(description=${__P(ldap.description,LDAP-LOADTEST)})(uid=lt-*))</stringProp>
+
+</LDAPExtSampler>
+<hashTree>
+<RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Collect leftover RDNs" enabled="true">
+<stringProp name="RegexExtractor.useHeaders">false</stringProp>
+<stringProp name="RegexExtractor.refname">LEFT</stringProp>
+<stringProp name="RegexExtractor.regex">&lt;dn&gt;(uid=[^,&lt;]+)</stringProp>
+<stringProp name="RegexExtractor.template">$1$</stringProp>
+<stringProp name="RegexExtractor.default"></stringProp>
+<stringProp name="RegexExtractor.match_number">-1</stringProp>
+<boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+</RegexExtractor>
+<hashTree/>
+</hashTree>
+<ForeachController guiclass="ForeachControlPanel" testclass="ForeachController" testname="For each leftover" enabled="true">
+<stringProp name="ForeachController.inputVal">LEFT</stringProp>
+<stringProp name="ForeachController.returnVal">LEFT_ONE</stringProp>
+<boolProp name="ForeachController.useSeparator">true</boolProp>
+</ForeachController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="TD delete leftover" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">delete</stringProp>
+<stringProp name="delete">${LEFT_ONE}</stringProp>
+</LDAPExtSampler>
+<hashTree/>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="TD unbind admin" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+</hashTree>
+</hashTree>
+<ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+<boolProp name="ResultCollector.error_logging">false</boolProp>
+<objProp><name>saveConfig</name><value class="SampleSaveConfiguration"><time>true</time><latency>true</latency><timestamp>true</timestamp><success>true</success><label>true</label><code>true</code><message>true</message><threadName>true</threadName><dataType>true</dataType><encoding>false</encoding><assertions>true</assertions><subresults>true</subresults><responseData>false</responseData><samplerData>false</samplerData><xml>false</xml><fieldNames>true</fieldNames><responseHeaders>false</responseHeaders><requestHeaders>false</requestHeaders><responseDataOnError>false</responseDataOnError><saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage><assertionsResultsToSave>0</assertionsResultsToSave><bytes>true</bytes><sentBytes>true</sentBytes><url>true</url><threadCounts>true</threadCounts><idleTime>true</idleTime><connectTime>true</connectTime></value></objProp>
+<stringProp name="filename"></stringProp>
+</ResultCollector>
+<hashTree/>
+<ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report (percentiles per label)" enabled="true">
+<boolProp name="ResultCollector.error_logging">false</boolProp>
+<objProp><name>saveConfig</name><value class="SampleSaveConfiguration"><time>true</time><latency>true</latency><timestamp>true</timestamp><success>true</success><label>true</label><code>true</code><message>true</message><threadName>true</threadName><dataType>true</dataType><encoding>false</encoding><assertions>true</assertions><subresults>true</subresults><responseData>false</responseData><samplerData>false</samplerData><xml>false</xml><fieldNames>true</fieldNames><responseHeaders>false</responseHeaders><requestHeaders>false</requestHeaders><responseDataOnError>false</responseDataOnError><saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage><assertionsResultsToSave>0</assertionsResultsToSave><bytes>true</bytes><sentBytes>true</sentBytes><url>true</url><threadCounts>true</threadCounts><idleTime>true</idleTime><connectTime>true</connectTime></value></objProp>
+<stringProp name="filename"></stringProp>
+</ResultCollector>
+<hashTree/>
+<ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree (errors only, GUI debugging)" enabled="true">
+<boolProp name="ResultCollector.error_logging">true</boolProp>
+<objProp><name>saveConfig</name><value class="SampleSaveConfiguration"><time>true</time><latency>true</latency><timestamp>true</timestamp><success>true</success><label>true</label><code>true</code><message>true</message><threadName>true</threadName><dataType>true</dataType><encoding>false</encoding><assertions>true</assertions><subresults>true</subresults><responseData>false</responseData><samplerData>false</samplerData><xml>false</xml><fieldNames>true</fieldNames><responseHeaders>false</responseHeaders><requestHeaders>false</requestHeaders><responseDataOnError>false</responseDataOnError><saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage><assertionsResultsToSave>0</assertionsResultsToSave><bytes>true</bytes><sentBytes>true</sentBytes><url>true</url><threadCounts>true</threadCounts><idleTime>true</idleTime><connectTime>true</connectTime></value></objProp>
+<stringProp name="filename"></stringProp>
+</ResultCollector>
+<hashTree/>
+</hashTree>
+</hashTree>
+</jmeterTestPlan>

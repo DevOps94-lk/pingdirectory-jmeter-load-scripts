@@ -46,6 +46,12 @@
 
 </LDAPExtSampler>
 <hashTree/>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
 <LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 02 admin, test OU" enabled="true">
 <stringProp name="servername"></stringProp>
 <stringProp name="port"></stringProp>
@@ -81,10 +87,17 @@
 </ResponseAssertion>
 <hashTree/>
 </hashTree>
+</hashTree>
 <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Create / modify / delete cycles" enabled="true">
 <stringProp name="LoopController.loops">${__P(ldap.cycles,3)}</stringProp>
 <boolProp name="LoopController.continue_forever">true</boolProp>
 </LoopController>
+<hashTree>
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin connection usable?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult() == null || (ctx.getPreviousResult().getResponseCode() != &quot;800&quot; &amp;&amp; ctx.getPreviousResult().getResponseCode() != &quot;500&quot;))}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
 <hashTree>
 <LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="ADD - 03 admin adds user" enabled="true">
 <stringProp name="servername"></stringProp>
@@ -137,7 +150,31 @@
 <boolProp name="IfController.useExpression">true</boolProp>
 </IfController>
 <hashTree>
-<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 04 user" enabled="true">
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 04 admin (close admin connection before the user binds)" enabled="true">
+<stringProp name="servername"></stringProp>
+<stringProp name="port"></stringProp>
+<stringProp name="rootdn">${TESTOU}</stringProp>
+<stringProp name="scope">1</stringProp>
+<stringProp name="countlimit">0</stringProp>
+<stringProp name="timelimit">0</stringProp>
+<stringProp name="attributes"></stringProp>
+<stringProp name="return_object">false</stringProp>
+<stringProp name="deref_aliases">false</stringProp>
+<stringProp name="connection_timeout">${__P(ldap.connectTimeoutMs,5000)}</stringProp>
+<stringProp name="parseflag">false</stringProp>
+<stringProp name="secure">false</stringProp>
+<stringProp name="trustall">false</stringProp>
+<stringProp name="user_dn"></stringProp>
+<stringProp name="user_pw"></stringProp>
+<stringProp name="comparedn"></stringProp>
+<stringProp name="comparefilt"></stringProp>
+<stringProp name="modddn"></stringProp>
+<stringProp name="newdn"></stringProp>
+<stringProp name="test">unbind</stringProp>
+
+</LDAPExtSampler>
+<hashTree/>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 05 user" enabled="true">
 <stringProp name="servername">${__P(ldap.host,)}</stringProp>
 <stringProp name="port">${__P(ldap.port,1636)}</stringProp>
 <stringProp name="rootdn">${TESTOU}</stringProp>
@@ -167,7 +204,7 @@
 <boolProp name="IfController.useExpression">true</boolProp>
 </IfController>
 <hashTree>
-<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 05 user, own entry" enabled="true">
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 06 user, own entry" enabled="true">
 <stringProp name="servername"></stringProp>
 <stringProp name="port"></stringProp>
 <stringProp name="rootdn">${TESTOU}</stringProp>
@@ -210,7 +247,7 @@
 </ResponseAssertion>
 <hashTree/>
 </hashTree>
-<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 06 user" enabled="true">
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 07 user" enabled="true">
 <stringProp name="servername"></stringProp>
 <stringProp name="port"></stringProp>
 <stringProp name="rootdn">${TESTOU}</stringProp>
@@ -235,7 +272,7 @@
 </LDAPExtSampler>
 <hashTree/>
 </hashTree>
-<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 07 admin re-bind" enabled="true">
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="BIND - 08 admin re-bind" enabled="true">
 <stringProp name="servername">${__P(ldap.host,)}</stringProp>
 <stringProp name="port">${__P(ldap.port,1636)}</stringProp>
 <stringProp name="rootdn">${TESTOU}</stringProp>
@@ -259,7 +296,13 @@
 
 </LDAPExtSampler>
 <hashTree/>
-<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 08 admin, added user" enabled="true">
+<IfController guiclass="IfControllerPanel" testclass="IfController" testname="Admin re-bind succeeded?" enabled="true">
+<stringProp name="IfController.condition">${__jexl3(ctx.getPreviousResult().isSuccessful())}</stringProp>
+<boolProp name="IfController.evaluateAll">false</boolProp>
+<boolProp name="IfController.useExpression">true</boolProp>
+</IfController>
+<hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 09 admin, added user" enabled="true">
 <stringProp name="servername"></stringProp>
 <stringProp name="port"></stringProp>
 <stringProp name="rootdn">${TESTOU}</stringProp>
@@ -310,7 +353,7 @@
 </ResponseAssertion>
 <hashTree/>
 </hashTree>
-<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="MODIFY - 09 admin, cn+sn" enabled="true">
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="MODIFY - 10 admin, cn+sn" enabled="true">
 <stringProp name="servername"></stringProp>
 <stringProp name="port"></stringProp>
 <stringProp name="rootdn">${TESTOU}</stringProp>
@@ -340,7 +383,7 @@
 </elementProp>
 </LDAPExtSampler>
 <hashTree/>
-<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 10 admin, modified user" enabled="true">
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 11 admin, modified user" enabled="true">
 <stringProp name="servername"></stringProp>
 <stringProp name="port"></stringProp>
 <stringProp name="rootdn">${TESTOU}</stringProp>
@@ -391,7 +434,7 @@
 </ResponseAssertion>
 <hashTree/>
 </hashTree>
-<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="DELETE - 11 admin deletes user" enabled="true">
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="DELETE - 12 admin deletes user" enabled="true">
 <stringProp name="servername"></stringProp>
 <stringProp name="port"></stringProp>
 <stringProp name="rootdn">${TESTOU}</stringProp>
@@ -415,7 +458,7 @@
 <stringProp name="delete">uid=${UID}</stringProp>
 </LDAPExtSampler>
 <hashTree/>
-<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 12 admin, deleted user (must not exist)" enabled="true">
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="SEARCH - 13 admin, deleted user (must not exist)" enabled="true">
 <stringProp name="servername"></stringProp>
 <stringProp name="port"></stringProp>
 <stringProp name="rootdn">${TESTOU}</stringProp>
@@ -452,7 +495,9 @@
 </hashTree>
 </hashTree>
 </hashTree>
-<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 13 admin" enabled="true">
+</hashTree>
+</hashTree>
+<LDAPExtSampler guiclass="LdapExtTestSamplerGui" testclass="LDAPExtSampler" testname="UNBIND - 14 admin" enabled="true">
 <stringProp name="servername"></stringProp>
 <stringProp name="port"></stringProp>
 <stringProp name="rootdn">${TESTOU}</stringProp>
